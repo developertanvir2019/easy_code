@@ -6,19 +6,43 @@ import { saveAs } from "file-saver";
 export default function Home() {
   const [selectedElement, setSelectedElement] = useState(null);
   const [inputStyles, setInputStyles] = useState({
-    size: "w-64",
+    size: "w-52 h-5",
     color: "text-black",
     border: "border-gray-300",
   });
   const [buttonStyles, setButtonStyles] = useState({
-    size: "px-4 py-2",
+    size: "px-4 py-0",
     color: "bg-blue-500 text-white",
     text: "Button",
   });
 
+  const sizeMapping = {
+    "w-48 h-5": { width: "12rem", height: "1.25rem" },
+    "w-36 h-3": { width: "9rem", height: "0.75rem" },
+    "w-56 h-6": { width: "14rem", height: "1.5rem" },
+    "w-52 h-5": { width: "13rem", height: "1.25rem" },
+  };
+
+  const borderMapping = {
+    "border-gray-300": "1px solid #D1D5DB",
+    "border-red-500": "1px solid #EF4444",
+    "border-blue-500": "1px solid #3B82F6",
+    "border-green-500": "1px solid #10B981",
+  };
+
+  const colorMapping = {
+    "text-black": "black",
+    "text-red-500": "red",
+    "text-blue-500": "blue",
+  };
+
   const handleDownload = async () => {
     const zip = new JSZip();
 
+    // Dynamically resolve styles
+    const inputSizeStyles = sizeMapping[inputStyles.size] || {};
+    const inputBorderStyle = borderMapping[inputStyles.border] || "";
+    const inputColorStyle = colorMapping[inputStyles.color] || "";
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -27,7 +51,7 @@ export default function Home() {
       </head>
       <body>
         <div>
-          <input class="${inputStyles.size} ${inputStyles.color} ${inputStyles.border}" placeholder="Input Field" />
+          <input class="${inputStyles.size} ${inputStyles.color} ${inputStyles.border}" placeholder="...." />
           <button class="${buttonStyles.size} ${buttonStyles.color}">${buttonStyles.text}</button>
         </div>
       </body>
@@ -36,13 +60,14 @@ export default function Home() {
 
     const cssContent = `
       .${inputStyles.size} {
-        width: 16rem;
+        width: ${inputSizeStyles.width};
+        height: ${inputSizeStyles.height};
       }
       .${inputStyles.color} {
-        color: black;
+        color: ${inputColorStyle};
       }
       .${inputStyles.border} {
-        border: 1px solid #D1D5DB;
+        border: ${inputBorderStyle};
       }
       .${buttonStyles.size} {
         padding: 0.5rem 1rem;
@@ -78,10 +103,41 @@ export default function Home() {
               }
               className="w-full p-2 border rounded"
             >
-              <option value="w-64">Medium</option>
-              <option value="w-48">Small</option>
-              <option value="w-80">Large</option>
+              <option value="w-48 h-5">Medium</option>
+              <option value="w-36 h-3">Small</option>
+              <option value="w-56 h-6">Large</option>
             </select>
+
+            <label className="mt-4 block">Border Color:</label>
+            <select
+              value={inputStyles.border}
+              onChange={(e) =>
+                setInputStyles({ ...inputStyles, border: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+            >
+              <option value="border-gray-300">Gray</option>
+              <option value="border-red-500">Red</option>
+              <option value="border-blue-500">Blue</option>
+            </select>
+
+            <label className="mt-4 block">Text Color:</label>
+            <div className="flex gap-4">
+              {Object.entries(colorMapping).map(([className, color]) => (
+                <label key={className} className="flex items-center gap-2">
+                  <input
+                    type="radio"
+                    name="text-color"
+                    value={className}
+                    checked={inputStyles.color === className}
+                    onChange={() =>
+                      setInputStyles({ ...inputStyles, color: className })
+                    }
+                  />
+                  <span style={{ color }}>{color}</span>
+                </label>
+              ))}
+            </div>
           </div>
         )}
         {selectedElement === "button" && (

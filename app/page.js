@@ -36,6 +36,17 @@ export default function Home() {
     "text-blue-500": "blue",
   };
 
+  const buttonSizeMapping = {
+    "px-4 py-2": { padding: "1rem 0.5rem" },
+    "px-6 py-3": { padding: "1.5rem 0.75rem" },
+    "px-2 py-1": { padding: "0.5rem 0.25rem" },
+  };
+
+  const buttonColorMapping = {
+    "bg-blue-500 text-white": { background: "#3B82F6", textColor: "white" },
+    "bg-red-500 text-white": { background: "#EF4444", textColor: "white" },
+    "bg-green-500 text-white": { background: "#10B981", textColor: "white" },
+  };
   const handleDownload = async () => {
     const zip = new JSZip();
 
@@ -43,6 +54,9 @@ export default function Home() {
     const inputSizeStyles = sizeMapping[inputStyles.size] || {};
     const inputBorderStyle = borderMapping[inputStyles.border] || "";
     const inputColorStyle = colorMapping[inputStyles.color] || "";
+    const buttonSizeStyles = buttonSizeMapping[buttonStyles.size] || {};
+    const buttonColorStyles = buttonColorMapping[buttonStyles.color] || {};
+    const formattedButtonColorClass = buttonStyles.color.replace(/\s+/g, "-");
     const htmlContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -52,7 +66,7 @@ export default function Home() {
       <body>
         <div>
           <input class="${inputStyles.size} ${inputStyles.color} ${inputStyles.border}" placeholder="...." />
-          <button class="${buttonStyles.size} ${buttonStyles.color}">${buttonStyles.text}</button>
+         <button class="${buttonStyles.size} ${formattedButtonColorClass}">${buttonStyles.text}</button>
         </div>
       </body>
       </html>
@@ -69,13 +83,13 @@ export default function Home() {
       .${inputStyles.border} {
         border: ${inputBorderStyle};
       }
-      .${buttonStyles.size} {
-        padding: 0.5rem 1rem;
-      }
-      .${buttonStyles.color} {
-        background-color: #3B82F6;
-        color: white;
-      }
+       .${buttonStyles.size} {
+    padding: ${buttonSizeStyles.padding};
+  }
+   .${formattedButtonColorClass} {
+    background-color: ${buttonColorStyles.background};
+    color: ${buttonColorStyles.textColor};
+  }
     `;
 
     // Add files to a folder inside the ZIP
@@ -142,7 +156,8 @@ export default function Home() {
         )}
         {selectedElement === "button" && (
           <div>
-            <label>Text:</label>
+            {/* Button Text */}
+            <label className="block mt-4">Button Text:</label>
             <input
               value={buttonStyles.text}
               onChange={(e) =>
@@ -150,6 +165,48 @@ export default function Home() {
               }
               className="w-full p-2 border rounded mb-2"
             />
+
+            {/* Button Size */}
+            <label className="block mt-4">Button Size:</label>
+            <select
+              value={buttonStyles.size}
+              onChange={(e) =>
+                setButtonStyles({ ...buttonStyles, size: e.target.value })
+              }
+              className="w-full p-2 border rounded"
+            >
+              <option value="px-4 py-0">Medium</option>
+              <option value="px-2 py-0">Small</option>
+              <option value="px-6 py-1">Large</option>
+            </select>
+
+            {/* Button Color */}
+            <label className="block mt-4">Button Color:</label>
+            <div className="flex gap-4">
+              {Object.entries(buttonColorMapping).map(([className, colors]) => (
+                <label key={className} className="flex items-center gap-1">
+                  <input
+                    type="radio"
+                    name="button-color"
+                    value={className}
+                    checked={buttonStyles.color === className}
+                    onChange={() =>
+                      setButtonStyles({ ...buttonStyles, color: className })
+                    }
+                  />
+                  <span
+                    style={{
+                      backgroundColor: colors.background,
+                      color: colors.textColor,
+                      padding: "5px",
+                      borderRadius: "0.25rem",
+                    }}
+                  >
+                    {colors.textColor}
+                  </span>
+                </label>
+              ))}
+            </div>
           </div>
         )}
       </div>
@@ -170,10 +227,10 @@ export default function Home() {
           </button>
         </div>
         <button
-          className="mt-8 bg-green-500 text-white px-4 py-2"
+          className="mt-8 bg-green-500 text-white px-3 py-1"
           onClick={handleDownload}
         >
-          Download
+          Export
         </button>
       </div>
     </div>
